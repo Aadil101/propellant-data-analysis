@@ -48,7 +48,7 @@ matlines(ageList, pList, lty='solid' ,  col = "red")
 matlines(ageList, cList, lty = 'solid', col = "blue")
 ```
 
-![](propellantDataAnalysis_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 # since n=20 we look at the t_18 distribution
@@ -101,7 +101,7 @@ matlines(ageList, pred_upper, lty='solid' ,  col = "red")
 matlines(ageList, pred_lower, lty = 'solid', col = "red")
 ```
 
-![](propellantDataAnalysis_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 #determining E(y|x0) at x0 = xbar
@@ -136,7 +136,7 @@ yBar = mean(shearS)
 abline(fitted)
 ```
 
-![](propellantDataAnalysis_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 ``` r
 #calculations
@@ -222,7 +222,7 @@ fitted <- lm(shearS_sq ~ age)
 abline(fitted,lwd=2,col='blue')
 ```
 
-![](propellantDataAnalysis_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 ### Part (b)
 
@@ -294,7 +294,7 @@ fitted <- lm(shearS ~ age)
 abline(fitted,lwd=2,col='blue')
 ```
 
-![](propellantDataAnalysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 ``` r
 Sxx <- sum((age-mean(age))^2)

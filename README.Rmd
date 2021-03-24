@@ -1,0 +1,249 @@
+---
+title: 'Math 50 Fall 2017, Homework #2'
+output: rmarkdown::github_document
+By: Aadil Islam
+---
+
+__NOTE: For your homework download and use the template__ (https://math.dartmouth.edu/~m50f17/HW2.Rmd)
+
+__Read the green comments in the rmd file to see where your answers should go.__
+
+## Question-1 (Sample)
+- Given a fixed confidence interval percentage (say 95%) at what value of x does CI on the mean response achieve its minimum width?  
+- The width of the interval is $2t_{\alpha/2,n-2}\sqrt{MS_{Res}((1/n)+(x_0-\bar{x})^2/S_{xx}}$
+- and all terms inside the square root are positive. Therefore it is minimized when $x_0=\bar{x}$. 
+- Write an R-chunk using the propellant data which computes the following. 
+  - (a) Fit a simple linear regression model relating shear strength to age.
+  - (b) Plot scatter diagram.
+  - (c) Plot two lines (in blue color) that traces upper and lower limits of 95% confidence interval on $E(y|x_0)$
+  - (d) Plot two lines (in red color) that traces upper and lower limits of 95% prediction interval for $y$ 
+  - (e) Print the 95% quantile of the corresponding t distribution 
+
+```{r}
+prop<-read.table("https://math.dartmouth.edu/~m50f17/propellant.csv", header=T, sep=",")
+
+shearS<-prop$ShearS 
+age<-prop$Age
+
+plot(age, shearS, xlab = "Propellant Age (weeks)", ylab = "Shear S. (psi)", main = "Rocket Propellant")
+fitted <- lm(shearS ~ age)
+
+ageList <- seq(0,25,0.5)
+cList <- predict(fitted, list(age = ageList), int = "c", level = 0.95)
+pList <- predict(fitted, list(age = ageList), int = "p", level = 0.95)
+
+matlines(ageList, pList, lty='solid' ,  col = "red")
+matlines(ageList, cList, lty = 'solid', col = "blue")
+
+# since n=20 we look at the t_18 distribution
+wantedQuantile <- qt( 0.95, 18) ; 
+```
+
+95% quantile is of $t_18$ is : `r wantedQuantile` 
+
+## Question-2
+
+- Plot the same graph as in Question-1 without using R function predict, but instead directly calculating the interval limits we discussed in class. 
+- In particular, what are the limits of 95% confidence interval on $E(y|x_0)$?  
+
+```{r}
+# Computation part of the answer : 
+
+#creating scatter plot
+prop<-read.table("https://math.dartmouth.edu/~m50f17/propellant.csv", header=T, sep=",")
+shearS<-prop$ShearS 
+age<-prop$Age
+plot(age, shearS, xlab = "Propellant Age (weeks)", ylab = "Shear S. (psi)", main = "Rocket Propellant")
+
+#preparing to create intervals
+fitted <- lm(shearS ~ age)
+yhat <- fitted$fitted.values
+Sxx <- sum((age-mean(age))^2)
+Sxy <- sum(shearS*(age-mean(age)))
+beta_1_hat <- Sxy/Sxx
+beta_0_hat <- mean(shearS) - beta_1_hat*(mean(age))
+ageList <- seq(0,25,0.5)
+mean_resp_hat = beta_0_hat + beta_1_hat*ageList
+SSres = sum((shearS-yhat)^2)
+MSres = SSres/18
+
+#constructing confidence interval
+conf_upper = mean_resp_hat + qt(1-0.05/2,18)*(MSres*(1/20 + ((ageList-mean(age))^2/Sxx)))^0.5
+conf_lower = mean_resp_hat - qt(1-0.05/2,18)*(MSres*(1/20 + ((ageList-mean(age))^2/Sxx)))^0.5
+matlines(ageList, conf_upper, lty='solid' ,  col = "blue")
+matlines(ageList, conf_lower, lty = 'solid', col = "blue")
+
+#constructing prediction interval
+yhat = beta_0_hat + beta_1_hat*ageList
+pred_upper = yhat + qt(1-0.05/2,18)*(MSres*(1+1/20 + ((ageList-mean(age))^2/Sxx)))^0.5
+pred_lower = yhat - qt(1-0.05/2,18)*(MSres*(1+1/20 + ((ageList-mean(age))^2/Sxx)))^0.5
+matlines(ageList, yhat, lty='solid' ,  col = "purple")
+matlines(ageList, pred_upper, lty='solid' ,  col = "red")
+matlines(ageList, pred_lower, lty = 'solid', col = "red")
+
+#determining E(y|x0) at x0 = xbar
+ageList = mean(age)
+mean_resp_hat = beta_0_hat + beta_1_hat*ageList
+conf_upper_x_bar = mean_resp_hat + qt(1-0.05/2,18)*(MSres*(1/20 + ((ageList-mean(age))^2/Sxx)))^0.5
+conf_lower_x_bar = mean_resp_hat - qt(1-0.05/2,18)*(MSres*(1/20 + ((ageList-mean(age))^2/Sxx)))^0.5
+
+```
+
+Limits of 95% confidence interval on $E(y|x_0)$: (`r conf_upper_x_bar`, `r conf_lower_x_bar`)
+
+## Question-3
+- Load the propellant data and fit a simple linear regression model relating shear strength to age.
+
+### Part (a) 
+- Test the hypothesis $\beta_1 = -30$ using confidence level 97.5%.
+
+```{r}
+#fitting model to data
+prop<-read.table("https://math.dartmouth.edu/~m50f17/propellant.csv", header=T, sep=",")
+shearS<-prop$ShearS 
+age<-prop$Age
+plot(age, shearS, xlab = "Propellant Age (weeks)", ylab = "Shear S. (psi)", main = "Rocket Propellant")
+fitted <- lm(shearS ~ age)
+yhat <- fitted$fitted.values
+yBar = mean(shearS)
+abline(fitted)
+
+#calculations
+Sxx <- sum((age-mean(age))^2)
+Sxy <- sum(shearS*(age-mean(age)))
+beta_1_hat <- Sxy/Sxx
+beta_0_hat <- mean(shearS) - beta_1_hat*(mean(age))
+SSres = sum((shearS-yhat)^2)
+MSres = SSres/18
+SSt <- sum((shearS-yBar)^2)
+SE_b1=(MSres/Sxx)^.5
+SE_b0=(MSres*(1/20+((mean(age))^2)/Sxx))^.5
+```
+
+beta_1 -30 does not lie in the 97.5% confidence interval for $\beta_1$: (-44.22, -30.09). Thus we reject this hypothesis and conclude that $\beta_1 \neq -30$.
+
+### Part (b) 
+- Calculate the limits of 97.5% confidence interval for $\beta_0$ and $\beta_1$
+
+```{r}
+upper_beta_1 = beta_1_hat + qt(1-0.025/2,df=18)*SE_b1
+lower_beta_1 = beta_1_hat - qt(1-0.025/2,df=18)*SE_b1
+```
+
+Upper Limit Beta 1: `r upper_beta_1`
+
+Lower Limit Beta 1: `r lower_beta_1`
+
+```{r}
+upper_beta_0 = beta_0_hat + qt(1-0.025/2,df=18)*SE_b0
+lower_beta_0 = beta_0_hat - qt(1-0.025/2,df=18)*SE_b0
+```
+
+Upper Limit Beta 0: `r upper_beta_0`
+
+Lower Limit Beta 0: `r lower_beta_0`
+
+### Part (c) 
+- Is there any relation between the answers you find in part (a) and (b) ?
+
+If $\beta_1 = G$ lies within the limits of the confidence interval, one can conclude (with confidence at the given level) that G can be the true $beta_1$. Contrarily, if $\beta_1 = G$ lies outside of the limits of the confidence interval, at the given confidence level we conclude that G cannot be the true $beta_1$. Another method of testing the hypothesis would be via the calculation of p-values, but we should still get the same results as we did with confidence intervals.
+
+### Part (d) 
+- Calculate $R^2$
+
+```{r}
+Rsq = 1 - SSres/SSt
+```
+
+R-squared: `r Rsq`
+
+## Question-4
+- Load the propellant data. This time let us consider a relation between square of shear strength and propellant age. 
+
+### Part (a) 
+- Fit a simple linear regression model relating __square__ of shear strength to age. Plot scatter diagram and fitted line. 
+
+```{r}
+prop<-read.table("https://math.dartmouth.edu/~m50f17/propellant.csv", header=T, sep=",")
+
+shearS_sq<-(prop$ShearS)^2
+age<-prop$Age
+plot(age, shearS_sq, xlab = "Propellant Age (weeks)", ylab = "Shear S. Squared (psi^2)", main = "Rocket Propellant")
+fitted <- lm(shearS_sq ~ age)
+abline(fitted,lwd=2,col='blue')
+```
+
+### Part (b) 
+- Using analysis-of-variance test for significance of regression (using the formulas we discussed in class)
+
+```{r}
+yhat <- fitted$fitted.values
+SSr <- sum((yhat-mean(shearS_sq))^2)
+SSres = sum((shearS_sq-yhat)^2)
+MSr = SSr
+MSres = SSres / 18
+f_stat = MSr/MSres
+limit = qf(0.95, 1, 18)
+```
+
+We calculate the F-statistic: `r f_stat`, which does not belong in confidence interval qf(0.95, 1, 18): (0, 4.41). Therefore, this is a statistically significant result at 5% level and we reject the null hypothesis of $beta_1 = 0$. Thus, the test supports a linear relationship.
+
+### Part (c) 
+- Use t-test and check significance of regression (using the formulas we discussed in class)
+
+```{r}
+Sxx <- sum((age-mean(age))^2)
+Sxy <- sum(shearS_sq*(age-mean(age)))
+beta_1_hat <- Sxy/Sxx
+t_stat = abs((beta_1_hat-0)/(MSres/Sxx)^0.5)
+limit = qt(1-0.05/2,18)
+```
+
+t-statistic: `r t_stat`, while qt(0.975): `r limit`. The t-statistic does not belong in the confidence interval (-2.10, 2.10) at the 5% level, thus we reject the null hypothesis of $beta_1 = 0$. Again, the test supports a linear relationship.
+
+### Part (d) 
+- Does the regression analysis predict a linear relationship between square of shear strength and propellant age ?
+
+Yes, according to our results from b) and c), the regression analysis predicts a linear relationship between square of shear strength and propellant age.
+
+## Question-5
+- Once again using propellant data fit a simple linear regression model between shear strength and propellant age. 
+- Consider the t-test for hypothesis $\beta_1 = G_1$, and develop a test for $\beta_1 > G_1$ instead. Then 
+
+### Part (a)  
+- Test the hypothesis $\beta_1 > -50$ with confidence level 99.9%. 
+
+```{r}
+prop<-read.table("https://math.dartmouth.edu/~m50f17/propellant.csv", header=T, sep=",")
+shearS<-prop$ShearS
+age<-prop$Age
+plot(age, shearS, xlab = "Propellant Age (weeks)", ylab = "Shear S. (psi)", main = "Rocket Propellant")
+fitted <- lm(shearS ~ age)
+abline(fitted,lwd=2,col='blue')
+
+Sxx <- sum((age-mean(age))^2)
+Sxy <- sum(shearS*(age-mean(age)))
+beta_1_hat <- Sxy/Sxx
+yhat <- fitted$fitted.values
+SSres = sum((shearS-yhat)^2)
+MSres = SSres / 18
+t_stat = abs((beta_1_hat-(-50))/(MSres/Sxx)^0.5)
+p_val = pt(t_stat, 18)
+```
+
+It was found that the t-statistic: `r t_stat`. It follows that the p-value: `r p_val`. This is greater than the significance level of $\alpha = 0.001$ and thus we fail to reject the null hypothesis. We conclude at the 0.1% level that the true $beta_1$ is greater than -50.
+
+### Part (b)  
+- Find the smallest value $G_1$ such that the hypothesis $\beta_1 > G_1$ is rejected. 
+
+```{r}
+guess = -(qt(0.001, 18)*(MSres/Sxx)^0.5-beta_1_hat)
+```
+
+G_1: `r guess`
+
+### Part (c)  Similarly what is the smallest value $G_0$ such that the hypothesis $\beta_0 > G_0$ is rejected. 
+
+```{r}
+guess = -(qt(0.001, 18)*(MSres*(1/20 + ((mean(age))^2/Sxx)))^0.5-beta_0_hat)
+```

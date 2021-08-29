@@ -4,8 +4,7 @@ Math 50 Fall 2017, Homework \#2
 ## Question-1 (Sample)
 
 -   Given a fixed confidence interval percentage (say 95%) at what value of x does CI on the mean response achieve its minimum width?  
--   The width of the interval is $2t_{\alpha/2,n-2}\sqrt{MS_{Res}((1/n)+(x_0-\bar{x})^2/S_{xx}}$
--   and all terms inside the square root are positive. Therefore it is minimized when *x*<sub>0</sub> = *x̄*.
+-   The width of the interval is <img src="https://render.githubusercontent.com/render/math?math=2t_{\alpha/2,n-2}\sqrt{MS_{Res}((1/n)+(x_0-\bar{x})^2/S_{xx}}"> and all terms inside the square root are positive. Therefore it is minimized when <img src="https://render.githubusercontent.com/render/math?math=x_0 = \bar{x}">.
 -   Write an R-chunk using the propellant data which computes the following.
     -   1.  Fit a simple linear regression model relating shear strength to age.
     -   2.  Plot scatter diagram.
@@ -270,7 +269,7 @@ It was found that the t-statistic: 4.4464989. It follows that the p-value: 0.999
 guess = -(qt(0.001, 18)*(MSres/Sxx)^0.5-beta_1_hat)
 ```
 
-G1: -26.7225154
+*G*<sub>1</sub>: -26.7225154
 
 ### Part (c) Similarly what is the smallest value *G*<sub>0</sub> such that the hypothesis *β*<sub>0</sub> &gt; *G*<sub>0</sub> is rejected.
 

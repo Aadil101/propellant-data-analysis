@@ -271,7 +271,8 @@ guess = -(qt(0.001, 18)*(MSres/Sxx)^0.5-beta_1_hat)
 
 *G*<sub>1</sub>: -26.7225154
 
-### Part (c) Similarly what is the smallest value *G*<sub>0</sub> such that the hypothesis *β*<sub>0</sub> &gt; *G*<sub>0</sub> is rejected.
+### Part (c) 
+- Similarly what is the smallest value *G*<sub>0</sub> such that the hypothesis *β*<sub>0</sub> &gt; *G*<sub>0</sub> is rejected.
 
 ``` r
 guess = -(qt(0.001, 18)*(MSres*(1/20 + ((mean(age))^2/Sxx)))^0.5-beta_0_hat)
